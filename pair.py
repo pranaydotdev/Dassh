@@ -1,16 +1,25 @@
-import subprocess
 import json
+import subprocess
+from pathlib import Path
 class pair:
   def Get(self):
       print("Enter Device Info")
       self.usr = input("username: ")
       self.ip = input("IP: ")
       self.port = input("port: ")
+
       self.device = {
         "username":self.usr,
         "host":self.ip,
         "port":self.port
       }
+      
+      try:
+          with open("devices.json","x") as file:
+              json.dump({"devices": []}, file, indent=4)
+      except FileExistsError:
+          pass
+
       with open("devices.json","r") as file:
           self.data=json.load(file)
           self.exist = any(
@@ -23,9 +32,38 @@ class pair:
   
   def Exec(self):
       if self.exist:
-              print("Device is already paired.")
+          print("Device is already paired.")
       else:
-          with open(r"C:\Users\prana\.ssh\id_ed25519.pub","r") as file:
+          ssh_dir = Path.home() / ".ssh"
+          ssh_dir.mkdir(exist_ok=True)
+          priv_key = ssh_dir / "dassh-ed25519"
+          pub_key = ssh_dir / "dassh-ed25519.pub"
+          if pub_key.exists() and priv_key.exists():
+              pass
+          else:
+              print("Generating Keys🔑🔑")
+              keygen = subprocess.run(
+                      [
+                          "ssh-keygen",
+                          "-t",
+                          "ed25519",
+                          "-f",
+                          str(priv_key),
+                          "-N",
+                          ""
+                      ],
+                      capture_output=True,
+                      text=True
+              )
+              if keygen.returncode == 0:
+                  print("Keys Generated")
+              else:
+                  print("Generation Failed")
+                  print(keygen.stderr)
+                  return
+
+
+          with open(pub_key,"r") as file:
               key=file.read();
           ssh_key = subprocess.run(
             [
@@ -43,6 +81,8 @@ class pair:
               ssh = subprocess.run(
                 [
                   "ssh",
+                  "-i",
+                  str(priv_key),
                   "-o",
                   "BatchMode=yes",
                   "-p",
