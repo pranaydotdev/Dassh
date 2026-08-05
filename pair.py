@@ -95,9 +95,6 @@ class pair:
               )
               if ssh.returncode == 0 and ssh.stdout.strip() == "Paired!!":
                   self.data["devices"].append(self.device)
-                  with open("devices.json", "w") as file:
-                      json.dump(self.data, file, indent=4)
-                      print(self.data)
               else:
                   print("Verification Failed!!")
           else:
