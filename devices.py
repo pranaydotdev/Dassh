@@ -28,4 +28,5 @@ def add(device):
     return True
 
 
-
+def get(index):
+    return load()["devices"][index]

@@ -1,9 +1,13 @@
 import json
+import devices
 import subprocess
 from pathlib import Path
 priv_key = Path.home() / ".ssh" / "dassh-ed25519"
 class Connect:
-    def connect(self, port, usr, ip):
+    def connect(self, device):
+        usr = device["username"]
+        ip = device["host"]
+        port = device["port"]
         self.proc = subprocess.Popen(
                 [
                     "ssh",
@@ -17,29 +21,33 @@ class Connect:
                 stderr=subprocess.PIPE,
                 text=True
                 )
+        if self.proc.poll() is not None:
+            print("Connection failed")
         return self.proc
     def run(self, cmd):
 
-        self.proc.stdin.write(cmd + "\necho Done\n")
+        self.proc.stdin.write(cmd + "\necho __Done__\n")
         self.proc.stdin.flush()
         output = []
         while True:
             line = self.proc.stdout.readline()
-            if line.strip() == "Done":
+            if line.strip() == "__Done__":
                 break
             output.append(line)
         return "".join(output)
-    def disconnect():
+    def disconnect(self):
         self.proc.stdin.write("\nexit\n")
         self.proc.stdin.flush()
-        self.proc.wait
-ct = Connect()           
-ct.connect(
+        self.proc.wait()
+if __name__ == "__main__":
+    ct = Connect()           
+    ct.connect(
         "8022",
         "u0_a245",
         "realme-c11-2021"
-)
-print(ct.run("pwd"))
-print(ct.run("whoami"))
-print(ct.run("ls"))
-ct.disconnect()
+    )
+    print(ct.run("pwd"))
+    print(ct.run("whoami"))
+    print(ct.run("ls"))
+    ct.disconnect()
+

@@ -9,10 +9,6 @@ def pair(port, usr, ip):
         "port": port
     }
 
-    if devices.exists(device):
-        print("Device already paired")
-        return
-
     ssh_dir = Path.home() / ".ssh"
     ssh_dir.mkdir(exist_ok=True)
 
